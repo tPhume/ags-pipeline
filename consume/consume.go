@@ -1,6 +1,6 @@
 // Package consume allows creation of a Consumer
-// A Consumer read and validate data from some data source
-// Data is then written to data source
+// A Consumer reads data from a channel created from Stream package
+// Data is then written using InsertData interface
 package consume
 
 // Message represent the data (associated with a controller) that is read from some data source

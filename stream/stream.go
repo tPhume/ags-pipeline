@@ -1,9 +1,9 @@
-// Package consume allows creation of a Consumer
-// A Consumer reads data from a channel created from Stream package
-// Data is then written using InsertData interface
-package consume
+// Package stream allows creation of a Stream
+// A Stream reads from a data source continuously
+// It sends data to a list of channels it keeps in a slice
+package stream
 
-// Message represent the data (associated with a controller) that is read from some data source
+// Message represent the data that comes from the data source
 type Message struct {
 	Token string `json:"token" validate:"uuid4"`
 	Data  []Data `json:"data" validate:"dive"`

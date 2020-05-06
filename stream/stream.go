@@ -18,3 +18,10 @@ type Data struct {
 	SoilMoisture int     `json:"soil_moisture" validate:"gte=0,lte=1000"`
 	WaterLevel   int     `json:"water_level" validate:"gte=0"`
 }
+
+// Stream type holds a receive channel where it gets the data
+// And a list of send channels that it must distribute the data to
+type Stream struct {
+	Receive <-chan interface{}
+	Send    []chan<- Message
+}

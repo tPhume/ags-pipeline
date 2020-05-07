@@ -21,7 +21,8 @@ type Data struct {
 
 // Stream type holds a receive channel where it gets the data
 // And a list of send channels that it must distribute the data to
+// The Consumer receiving the data must never mutate the state no matter what
 type Stream struct {
 	Receive <-chan interface{}
-	Send    []chan<- Message
+	Send    []chan<- *Message
 }

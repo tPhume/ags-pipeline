@@ -18,6 +18,6 @@ type InsertData interface {
 
 // Consumer holds a channel created by stream package
 type Consumer struct {
-	Stream <-chan stream.Message
+	Stream <-chan *stream.Message
 	Source Source
 }

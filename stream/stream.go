@@ -3,6 +3,8 @@
 // It sends validates the data and sends it to another channel
 package stream
 
+import "github.com/streadway/amqp"
+
 // Message represent the data that comes from the data source
 type Message struct {
 	Token string `json:"token" validate:"uuid4"`
@@ -19,9 +21,13 @@ type Data struct {
 	WaterLevel   int     `json:"water_level" validate:"gte=0"`
 }
 
-// Stream type holds a receive channel where it gets the data
+// RabbitStream type holds a receive channel (amqp.Delivery) where it gets the data
 // And a send channel to send data after validation
-type Stream struct {
-	Receive <-chan interface{}
+type RabbitStream struct {
+	Receive <-chan amqp.Delivery
 	Send    chan<- *Message
+}
+
+func (s *RabbitStream) ListenRabbitMQ() error {
+	panic("implement me")
 }

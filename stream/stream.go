@@ -1,6 +1,6 @@
 // Package stream allows creation of a Stream
 // A Stream reads from a data source continuously
-// It sends data to a list of channels it keeps in a slice
+// It sends validates the data and sends it to another channel
 package stream
 
 // Message represent the data that comes from the data source
@@ -20,9 +20,8 @@ type Data struct {
 }
 
 // Stream type holds a receive channel where it gets the data
-// And a list of send channels that it must distribute the data to
-// The Consumer receiving the data must never mutate the state no matter what
+// And a send channel to send data after validation
 type Stream struct {
 	Receive <-chan interface{}
-	Send    []chan<- *Message
+	Send    chan<- *Message
 }

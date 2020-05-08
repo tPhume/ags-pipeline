@@ -1,23 +1,17 @@
-// Consumer reads data from a channel and writes to data source
-// It defines interface for these operations and a struct that holds the channel
+// Consumer reads data from a channel and passes it to an interface that connects to the data source
 package consumer
 
 import (
 	"context"
-	"github.com/tPhume/ags-pipeline/stream"
 )
 
-type Source interface {
-	InsertData()
+// DataSource is an interface that Consumer uses when it receives something
+type DataSource interface {
+	Do(ctx context.Context, msg *interface{}) error
 }
 
-// InsertData interface is used by Consumer to insert new data to data source
-type InsertData interface {
-	Insert(ctx context.Context, msg stream.Message) error
-}
-
-// Consumer holds a channel created by stream package
+// Consumer gets consumes message from a channel
 type Consumer struct {
-	Stream <-chan *stream.Message
-	Source Source
+	Stream     <-chan interface{}
+	DataSource DataSource
 }

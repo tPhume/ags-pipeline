@@ -18,7 +18,7 @@ var (
 const Fatal = iota
 
 // Handle is used by Consumer to do something with the message
-type Handle func(ctx context.Context, msg interface{}) error
+type Handle func(ctx context.Context) error
 
 // Consumer gets consumes message from a channel
 type Consumer struct {
@@ -42,11 +42,15 @@ func (c *Consumer) Listen() error {
 	go func() {
 		for msg := range c.Stream {
 			log.Println("Received a message")
-			ctx, cancel := context.WithTimeout(mainCtx, time.Second*25)
+
+			// Creates a context with set timeout then create a sub context and attach message
+			ctxTimeout, cancel := context.WithTimeout(mainCtx, time.Second*25)
+			ctxValue := context.WithValue(ctxTimeout, "msg", msg)
+
 			go func() {
 				defer cancel()
 
-				if err := c.Handle(ctx, msg); err != nil {
+				if err := c.Handle(ctxValue); err != nil {
 					quit <- Fatal
 				}
 			}()

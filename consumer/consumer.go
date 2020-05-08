@@ -17,15 +17,13 @@ var (
 
 const Fatal = iota
 
-// DataSource is an interface that Consumer uses when it receives something
-type DataSource interface {
-	Do(ctx context.Context, msg interface{}) error
-}
+// Handle is used by Consumer to do something with the message
+type Handle func(ctx context.Context, msg interface{}) error
 
 // Consumer gets consumes message from a channel
 type Consumer struct {
-	Stream     <-chan interface{}
-	DataSource DataSource
+	Stream <-chan interface{}
+	Handle Handle
 }
 
 // Listen starts a blocking call that waits for messages
@@ -48,7 +46,7 @@ func (c *Consumer) Listen() error {
 			go func() {
 				defer cancel()
 
-				if err := c.DataSource.Do(ctx, msg); err != nil {
+				if err := c.Handle(ctx, msg); err != nil {
 					quit <- Fatal
 				}
 			}()

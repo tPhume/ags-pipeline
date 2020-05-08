@@ -11,8 +11,8 @@ import (
 var (
 	ErrNilStream = errors.New("stream is nil")
 
-	// If DataSource returns this error Consumer will exit
-	ErrSourceFatal = errors.New("fatal error from DataSource")
+	// Should be used by handler to indicate fatal error
+	ErrFatal = errors.New("fatal error from handler")
 )
 
 const Fatal = iota
@@ -51,7 +51,11 @@ func (c *Consumer) Listen() error {
 				defer cancel()
 
 				if err := c.Handle(ctxValue); err != nil {
-					quit <- Fatal
+					if err == ErrFatal {
+						quit <- Fatal
+					} else {
+						log.Println(err.Error())
+					}
 				}
 			}()
 		}
@@ -60,7 +64,7 @@ func (c *Consumer) Listen() error {
 	// wait for exit
 	switch <-quit {
 	case Fatal:
-		return ErrSourceFatal
+		return ErrFatal
 	}
 
 	return nil

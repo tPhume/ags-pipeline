@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/streadway/amqp"
 	"github.com/tPhume/ags-pipeline/consumer"
 	"log"
@@ -46,19 +45,24 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 
 	var msg *Message
 	if err := json.Unmarshal(delivery.Body, msg); err != nil {
+		log.Printf("cannot unmarshal message[%s], err: %s\n", delivery.MessageId, err.Error())
+		_ = delivery.Nack(false, true)
 		return errors.New("problem decoding data for message " + delivery.MessageId)
 	}
 
 	if err := r.DataSource.Write(ctx, msg); err != nil {
+		log.Printf("cannot write message[%s] , err: %s\n", delivery.MessageId, err.Error())
+		_ = delivery.Nack(false, true)
 		return consumer.ErrFatal
 	}
-	log.Println(fmt.Sprintf("written message %s to data source", delivery.MessageId))
+	log.Printf("written message %s to data source\n", delivery.MessageId)
 
 	if err := delivery.Ack(true); err != nil {
-		log.Println("cannot ack message " + delivery.MessageId)
+		log.Printf("cannot ack messag[%s], err: %s", delivery.MessageId, err.Error())
+		_ = delivery.Nack(false, true)
 		return consumer.ErrFatal
 	}
-	log.Println(fmt.Sprintf("message %s acked", delivery.MessageId))
+	log.Printf("message[%s] acked", delivery.MessageId)
 
 	return nil
 }

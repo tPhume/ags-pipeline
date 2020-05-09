@@ -12,8 +12,8 @@ require (
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/spf13/viper v1.6.3 // indirect
-	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71 // indirect
+	github.com/spf13/viper v1.6.3
+	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
 	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
 	gopkg.in/ini.v1 v1.55.0 // indirect
 )

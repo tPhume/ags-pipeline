@@ -46,7 +46,7 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 	var msg *Message
 	if err := json.Unmarshal(delivery.Body, msg); err != nil {
 		log.Printf("cannot unmarshal message[%s], err: %s\n", delivery.MessageId, err.Error())
-		_ = delivery.Nack(false, true)
+		_ = delivery.Nack(false, false)
 		return errors.New("problem decoding data for message " + delivery.MessageId)
 	}
 

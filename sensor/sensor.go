@@ -58,6 +58,7 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 		log.Println("cannot ack message " + delivery.MessageId)
 		return consumer.ErrFatal
 	}
+	log.Println(fmt.Sprintf("message %s acked", delivery.MessageId))
 
 	return nil
 }

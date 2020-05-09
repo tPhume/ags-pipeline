@@ -4,6 +4,7 @@ package consumer
 import (
 	"context"
 	"errors"
+	"github.com/streadway/amqp"
 	"log"
 	"time"
 )
@@ -20,27 +21,27 @@ const Fatal = iota
 // Handle is used by Consumer to do something with the message
 type Handle func(ctx context.Context) error
 
-// Consumer gets consumes message from a channel
-type Consumer struct {
-	Stream <-chan interface{}
+// Listener consumers from a channel and runs a new goroutine to handle each one
+type Listener struct {
+	Stream <-chan amqp.Delivery
 	Handle Handle
 }
 
 // Listen starts a blocking call that waits for messages
-func (c *Consumer) Listen() error {
+func (l *Listener) Listen() error {
 	// context for this function
 	mainCtx, mainCancel := context.WithCancel(context.Background())
 	defer mainCancel()
 
 	quit := make(chan int)
 
-	if c.Stream == nil {
+	if l.Stream == nil {
 		return ErrNilStream
 	}
 
 	log.Println("Waiting for messages")
 	go func() {
-		for msg := range c.Stream {
+		for msg := range l.Stream {
 			log.Println("Received a message")
 
 			// Creates a context with set timeout then create a sub context and attach message
@@ -50,7 +51,7 @@ func (c *Consumer) Listen() error {
 			go func() {
 				defer cancel()
 
-				if err := c.Handle(ctxValue); err != nil {
+				if err := l.Handle(ctxValue); err != nil {
 					if err == ErrFatal {
 						quit <- Fatal
 					} else {

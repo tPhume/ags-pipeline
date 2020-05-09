@@ -43,7 +43,7 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 		return errors.New("incorrect data type")
 	}
 
-	var msg *Message
+	msg := &Message{}
 	if err := json.Unmarshal(delivery.Body, msg); err != nil {
 		log.Printf("cannot unmarshal message[%s], err: %s\n", delivery.MessageId, err.Error())
 		_ = delivery.Nack(false, false)

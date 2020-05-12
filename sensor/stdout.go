@@ -8,12 +8,12 @@ import (
 
 type Stdout struct{}
 
-func (s *Stdout) Write(ctx context.Context, msg *Message) error {
+func (s *Stdout) Write(ctx context.Context, meta *Meta, msg *Message) error {
 	msgJson, err := json.MarshalIndent(msg, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(string(msgJson))
+	fmt.Printf("user_id: %s\ncontroller_id: %s\ndata: %s", meta.UserId, meta.ControllerId, string(msgJson))
 	return nil
 }

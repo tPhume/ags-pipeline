@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"github.com/tPhume/ags-pipeline/consumer"
 	"github.com/tPhume/ags-pipeline/sensor"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -23,7 +27,10 @@ func main() {
 	rabbitURI := viper.GetString("RABBIT_URI")
 	queueName := viper.GetString("QUEUE_NAME")
 
-	failOnEmpty(rabbitURI, queueName)
+	mongoURI := viper.GetString("MONGO_URI")
+	mongoDb := viper.GetString("MONGO_DB")
+
+	failOnEmpty(rabbitURI, queueName, mongoURI, mongoDb)
 
 	// Connect and consume messages from RabbitMQ
 	// Create RabbitMQ connection
@@ -49,12 +56,27 @@ func main() {
 	)
 	failOnError("could not register consumer", err)
 
+	// Connect to Mongodb
+	// Get Database and Collection
+	mongoClient, err := mongo.NewClient(options.Client().ApplyURI(mongoURI))
+	failOnError("could not create mongo client", err)
+
+	timeout, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	err = mongoClient.Connect(timeout)
+	failOnError("could not start mongo connection", err)
+
+	mongoDatabase := mongoClient.Database(mongoDb)
+	controllerCol := mongoDatabase.Collection("controller")
+
 	// Create a validator
 	v := validator.New()
 
-	// Create sensor.RabbitMQ with sensor.Stdout
+	// Create sensor.RabbitMQ with sensor.Stdout and sensor.Mongo
 	stdout := &sensor.Stdout{}
-	rabbitMQSensor := &sensor.RabbitMQ{Validator: v, DataSource: stdout}
+	metaMongo := &sensor.Mongodb{Col: controllerCol}
+	rabbitMQSensor := &sensor.RabbitMQ{Validator: v, Storage: stdout, MetaStorage: metaMongo}
 
 	// Create consumer.Listener type
 	listener := consumer.Listener{Stream: msgs, Handle: rabbitMQSensor.Write}

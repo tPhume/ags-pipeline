@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
 	"github.com/tPhume/ags-pipeline/consumer"
@@ -48,9 +49,12 @@ func main() {
 	)
 	failOnError("could not register consumer", err)
 
+	// Create a validator
+	v := validator.New()
+
 	// Create sensor.RabbitMQ with sensor.Stdout
 	stdout := &sensor.Stdout{}
-	rabbitMQSensor := &sensor.RabbitMQ{DataSource: stdout}
+	rabbitMQSensor := &sensor.RabbitMQ{Validator: v, DataSource: stdout}
 
 	// Create consumer.Listener type
 	listener := consumer.Listener{Stream: msgs, Handle: rabbitMQSensor.Write}

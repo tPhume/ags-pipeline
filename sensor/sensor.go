@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/go-playground/validator/v10"
 	"github.com/streadway/amqp"
 	"github.com/tPhume/ags-pipeline/consumer"
 	"log"
@@ -33,6 +34,7 @@ type DataSource interface {
 // If data is from RabbitMQ - use this
 // Implements consumer.DataSource
 type RabbitMQ struct {
+	Validator  *validator.Validate
 	DataSource DataSource
 }
 
@@ -48,6 +50,11 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 		log.Printf("cannot unmarshal message[%s], err: %s\n", delivery.MessageId, err.Error())
 		_ = delivery.Nack(false, false)
 		return errors.New("problem decoding data for message " + delivery.MessageId)
+	}
+
+	if err := r.Validator.Struct(msg); err != nil {
+		_ = delivery.Nack(false, false)
+		return err
 	}
 
 	if err := r.DataSource.Write(ctx, msg); err != nil {

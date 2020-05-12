@@ -28,8 +28,8 @@ type Data struct {
 
 // Meta describes the information about the controller
 type Meta struct {
-	UserId       string `json:"user_id"`
-	ControllerId string `json:"controller_id"`
+	ControllerId string `bson:"_id"`
+	UserId       string `bson:"user_id"`
 }
 
 // Interacts with out data source

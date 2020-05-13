@@ -42,7 +42,10 @@ type MetaStorage interface {
 	Get(ctx context.Context, token string, meta *Meta) error
 }
 
-var ErrBadToken = errors.New("token not found in storage")
+var (
+	ErrBadToken     = errors.New("token not found in storage")
+	ErrBadTimeStamp = errors.New("bad timestamp format")
+)
 
 // If data is from RabbitMQ - use this
 // Implements consumer.DataSource
@@ -79,6 +82,10 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 	if err := r.MetaStorage.Get(ctx, msg.Token, meta); err != nil {
 		if err == ErrBadToken {
 			log.Printf("bad token for message[%s]\n", delivery.MessageId)
+			_ = delivery.Nack(false, false)
+			return err
+		} else if err == ErrBadTimeStamp {
+			log.Printf("bad timestamp for message[%s]\n", delivery.MessageId)
 			_ = delivery.Nack(false, false)
 			return err
 		}

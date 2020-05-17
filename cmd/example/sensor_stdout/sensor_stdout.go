@@ -10,6 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"os"
 	"strings"
 	"time"
 )
@@ -18,19 +19,19 @@ func main() {
 	var err error
 
 	// Setup configuration
-	viper.SetConfigFile("example.env")
+	viper.SetConfigFile(os.Args[1])
 
 	err = viper.ReadInConfig()
-	failOnError("could not read example.env", err)
+	failOnError("could not read env file", err)
 
 	// Load environment variables
 	rabbitURI := viper.GetString("RABBIT_URI")
-	queueName := viper.GetString("QUEUE_NAME")
+	queue := viper.GetString("QUEUE")
 
 	mongoURI := viper.GetString("MONGO_URI")
 	mongoDb := viper.GetString("MONGO_DB")
 
-	failOnEmpty(rabbitURI, queueName, mongoURI, mongoDb)
+	failOnEmpty(rabbitURI, queue, mongoURI, mongoDb)
 
 	// Connect and consume messages from RabbitMQ
 	// Create RabbitMQ connection
@@ -43,10 +44,10 @@ func main() {
 	ch, err := conn.Channel()
 	failOnError("could not open new channel", err)
 
-	// Register a consumer
-	log.Println("Registering a consumer")
-	msgs, err := ch.Consume(
-		queueName,
+	// Register influx consumer
+	log.Println("Registering queue consumers")
+	msg, err := ch.Consume(
+		queue,
 		"",
 		false,
 		false,
@@ -54,7 +55,7 @@ func main() {
 		false,
 		nil,
 	)
-	failOnError("could not register consumer", err)
+	failOnError("could not register queue consumer", err)
 
 	// Connect to Mongodb
 	// Get Database and Collection
@@ -79,7 +80,7 @@ func main() {
 	rabbitMQSensor := &sensor.RabbitMQ{Validator: v, Storage: stdout, MetaStorage: metaMongo}
 
 	// Create consumer.Listener type
-	listener := consumer.Listener{Stream: msgs, Handle: rabbitMQSensor.Write}
+	listener := consumer.Listener{Stream: msg, Handle: rabbitMQSensor.Write}
 
 	log.Fatal(listener.Listen())
 }

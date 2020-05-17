@@ -23,15 +23,16 @@ func main() {
 	// Load environment variables
 	influxURL := viper.GetString("INFLUX_URL")
 	influxToken := viper.GetString("INFLUX_TOKEN")
+	influxDatabase := viper.GetString("INFLUX_DATABASE")
 
-	failOnEmpty(influxURL, influxToken)
+	failOnEmpty(influxURL, influxToken, influxDatabase)
 
 	// Create Influxdb client
 	client := influxdb2.NewClient(influxURL, influxToken)
 	defer client.Close()
 
 	// Create an influxdb writer
-	influxWriter := client.WriteApiBlocking("", "test")
+	influxWriter := client.WriteApiBlocking("", influxDatabase)
 
 	// Mock data
 	mock := sensor.Message{
@@ -51,7 +52,7 @@ func main() {
 
 	err = influxWriter.WritePoint(ctx, influxdb2.NewPoint(
 		"sensor",
-		map[string]string{"user_id": "test-user-id", "controller-id": "test-controller-id"},
+		map[string]string{"user_id": "test-user-id", "controller_id": "test-controller-id"},
 		map[string]interface{}{
 			"temperature":   roundFloat(mock.Data.Temperature),
 			"humidity":      roundFloat(mock.Data.Humidity),

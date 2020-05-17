@@ -20,4 +20,5 @@ require (
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a // indirect
 	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
 	gopkg.in/ini.v1 v1.55.0 // indirect
+	gopkg.in/rethinkdb/rethinkdb-go.v6 v6.2.1 // indirect
 )

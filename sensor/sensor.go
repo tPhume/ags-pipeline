@@ -8,6 +8,7 @@ import (
 	"github.com/streadway/amqp"
 	"github.com/tPhume/ags-pipeline/consumer"
 	"log"
+	"math"
 )
 
 // Message represent the data from sensors
@@ -77,6 +78,11 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 		return err
 	}
 
+	// Round mesurements
+	msg.Data.Light = roundFloat(msg.Data.Light)
+	msg.Data.Humidity = roundFloat(msg.Data.Humidity)
+	msg.Data.Temperature = roundFloat(msg.Data.Temperature)
+
 	// Get metadata
 	meta := &Meta{}
 	if err := r.MetaStorage.Get(ctx, msg.Token, meta); err != nil {
@@ -112,4 +118,9 @@ func (r *RabbitMQ) Write(ctx context.Context) error {
 	log.Printf("message[%s] acked", delivery.MessageId)
 
 	return nil
+}
+
+// Helper function to make float number be 2 decimal place
+func roundFloat(x float64) float64 {
+	return math.Round(x*100) / 100
 }

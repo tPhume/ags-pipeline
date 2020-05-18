@@ -3,6 +3,7 @@ package summary
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type Data map[string]float64
@@ -11,7 +12,6 @@ type Summary struct {
 	Id           string
 	UserId       string
 	ControllerId string
-	Date         string
 	Data         Data
 }
 
@@ -29,5 +29,19 @@ type Storage struct {
 }
 
 func (s *Storage) Handle(ctx *gin.Context) {
-	panic("implement me")
+	summary := make(map[string]*Summary)
+
+	// Read data from storage
+	if err := s.Reader.Read(ctx, summary); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"err": err, "details": err.Error()})
+		return
+	}
+
+	// Write data to storage
+	if err := s.Writer.Write(ctx, summary); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"err": err, "details": err.Error()})
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
 }

@@ -12,7 +12,7 @@ type Mongodb struct {
 
 func (m *Mongodb) Get(ctx context.Context, token string, meta *Meta) error {
 	// Query for document
-	res := m.Col.FindOne(ctx, bson.M{"_id": token})
+	res := m.Col.FindOne(ctx, bson.M{"token": token})
 	if res.Err() != nil {
 		if res.Err() == mongo.ErrNoDocuments {
 			return ErrBadToken

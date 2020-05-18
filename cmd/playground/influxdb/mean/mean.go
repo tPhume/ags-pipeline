@@ -5,12 +5,14 @@ import (
 	"fmt"
 	influxdb2 "github.com/influxdata/influxdb-client-go"
 	"github.com/spf13/viper"
+	"github.com/tPhume/ags-pipeline/summary"
 	"log"
+	"math"
 	"strings"
 )
 
 const queryString = `from(bucket: "production/autogen")
-  |> range(start: 2020-05-18T00:00:00Z, stop: 2020-05-18T23:59:00Z)
+  |> range(start: 2020-05-17T17:00:00Z, stop: 2020-05-18T16:59:59Z)
   |> filter(fn: (r) => r._measurement == "sensor")
   |> mean()
   |> duplicate(column: "_stop", as: "_time")`
@@ -42,10 +44,37 @@ func main() {
 	result, err := queryApi.Query(context.Background(), queryString)
 	failOnError("could not query data", err)
 
-	// Print result
+	// Collect results
+	data := make(map[string]*summary.Summary)
 	for result.Next() {
-		fmt.Printf("%v\n\n", result.Record())
+		record := result.Record()
+
+		// Get user_id and controller_id
+		userId := record.ValueByKey("user_id").(string)
+		controllerId := record.ValueByKey("controller_id").(string)
+
+		// Add value to map
+		_ = addToMap(data, userId, controllerId, record.Field(), record.ValueByKey("_value"))
 	}
+
+	// Print result
+	for k, v := range data {
+		fmt.Printf("---- Controller ID:%v\n%v\n\n", k, v)
+	}
+}
+
+func addToMap(m map[string]*summary.Summary, userId string, controllerId string, field string, value interface{}) error {
+	if _, exist := m[controllerId]; !exist {
+		m[controllerId] = &summary.Summary{UserId: userId, ControllerId: controllerId, Data: make(summary.Data)}
+	}
+
+	m[controllerId].Data[field] = roundFloat(value.(float64))
+
+	return nil
+}
+
+func roundFloat(x float64) float64 {
+	return math.Round(x*100) / 100
 }
 
 func failOnEmpty(env ...string) {

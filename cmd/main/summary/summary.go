@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tPhume/ags-pipeline/summary"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"strings"
 )
@@ -25,10 +26,10 @@ func main() {
 	influxToken := viper.GetString("INFLUX_TOKEN")
 	influxDatabase := viper.GetString("INFLUX_DATABASE")
 
-	mongoUrl := viper.GetString("MONGO_URL")
+	mongoUri := viper.GetString("MONGO_URI")
 	mongoDb := viper.GetString("MONGO_DB")
 
-	failOnEmpty(influxURL, influxToken, influxDatabase, mongoUrl, mongoDb)
+	failOnEmpty(influxURL, influxToken, influxDatabase, mongoUri, mongoDb)
 
 	// Create Influxdb client
 	client := influxdb2.NewClient(influxURL, influxToken)
@@ -38,7 +39,7 @@ func main() {
 	queryApi := client.QueryApi("")
 
 	// Create Mongo Client
-	mongoClient, err := mongo.NewClient()
+	mongoClient, err := mongo.NewClient(options.Client().ApplyURI(mongoUri))
 	failOnError("fail to create mongo client", err)
 
 	err = mongoClient.Connect(context.Background())

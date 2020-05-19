@@ -21,7 +21,7 @@ func (m *Mongo) Write(ctx context.Context, summary map[string]*Summary) error {
 		m := mongo.NewUpdateOneModel()
 
 		m.SetUpsert(true)
-		m.SetFilter(bson.M{"controller_id": v.Id, "user_id": v.UserId})
+		m.SetFilter(bson.M{"controller_id": v.ControllerId, "user_id": v.UserId})
 		m.SetUpdate(bson.M{
 			"$set": bson.M{
 				"date":               today,
@@ -32,6 +32,8 @@ func (m *Mongo) Write(ctx context.Context, summary map[string]*Summary) error {
 				"mean_water_level":   v.Data["water_level"],
 			},
 		})
+
+		models = append(models, m)
 	}
 
 	if _, err := m.Col.BulkWrite(ctx, models); err != nil {

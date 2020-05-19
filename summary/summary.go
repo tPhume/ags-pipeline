@@ -16,11 +16,15 @@ type Summary struct {
 }
 
 type ReadStorage interface {
-	Read(ctx context.Context, summary map[string]*Summary) error
+	ReadMean(ctx context.Context, summary map[string]*Summary) error
+
+	ReadMedian(ctx context.Context, summary map[string]*Summary) error
 }
 
 type WriteStorage interface {
-	Write(ctx context.Context, summary map[string]*Summary) error
+	WriteMean(ctx context.Context, summary map[string]*Summary) error
+
+	WriteMedian(ctx context.Context, summary map[string]*Summary) error
 }
 
 type Storage struct {
@@ -32,13 +36,31 @@ func (s *Storage) HandleMean(ctx *gin.Context) {
 	summary := make(map[string]*Summary)
 
 	// Read data from storage
-	if err := s.Reader.Read(ctx, summary); err != nil {
+	if err := s.Reader.ReadMean(ctx, summary); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"at": "reader", "err": err, "details": err.Error()})
 		return
 	}
 
 	// Write data to storage
-	if err := s.Writer.Write(ctx, summary); err != nil {
+	if err := s.Writer.WriteMean(ctx, summary); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"at": "writer", "err": err, "details": err.Error()})
+		return
+	}
+
+	ctx.Status(http.StatusCreated)
+}
+
+func (s *Storage) HandleMedian(ctx *gin.Context) {
+	summary := make(map[string]*Summary)
+
+	// Read data from storage
+	if err := s.Reader.ReadMedian(ctx, summary); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"at": "reader", "err": err, "details": err.Error()})
+		return
+	}
+
+	// Write data to storage
+	if err := s.Writer.WriteMedian(ctx, summary); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"at": "writer", "err": err, "details": err.Error()})
 		return
 	}

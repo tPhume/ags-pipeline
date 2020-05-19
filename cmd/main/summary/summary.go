@@ -60,6 +60,7 @@ func main() {
 	// Init Gin
 	engine := gin.New()
 	engine.POST("api/v1/mean", storage.HandleMean)
+	engine.POST("api/v1/median", storage.HandleMedian)
 
 	log.Fatal(engine.Run("0.0.0.0:8081"))
 }

@@ -53,10 +53,9 @@ func (m *Mongo) WriteMedian(ctx context.Context, summary map[string]*Summary) er
 		m := mongo.NewUpdateOneModel()
 
 		m.SetUpsert(true)
-		m.SetFilter(bson.M{"controller_id": v.ControllerId, "user_id": v.UserId})
+		m.SetFilter(bson.M{"controller_id": v.ControllerId, "user_id": v.UserId, "date": today})
 		m.SetUpdate(bson.M{
 			"$set": bson.M{
-				"date":                 today,
 				"median_humidity":      v.Data["humidity"],
 				"median_light":         v.Data["light"],
 				"median_soil_moisture": v.Data["soil_moisture"],

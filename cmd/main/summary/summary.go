@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	influxdb2 "github.com/influxdata/influxdb-client-go"
 	"github.com/spf13/viper"
@@ -10,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -58,7 +60,17 @@ func main() {
 	}
 
 	// Init Gin
+	corsConfig := cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+	}
+
 	engine := gin.New()
+	engine.Use(cors.New(corsConfig))
+
 	engine.POST("api/v1/mean", storage.HandleMean)
 	engine.POST("api/v1/median", storage.HandleMedian)
 

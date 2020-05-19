@@ -28,7 +28,7 @@ type Storage struct {
 	Writer WriteStorage
 }
 
-func (s *Storage) Handle(ctx *gin.Context) {
+func (s *Storage) HandleMean(ctx *gin.Context) {
 	summary := make(map[string]*Summary)
 
 	// Read data from storage

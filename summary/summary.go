@@ -33,13 +33,13 @@ func (s *Storage) Handle(ctx *gin.Context) {
 
 	// Read data from storage
 	if err := s.Reader.Read(ctx, summary); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"err": err, "details": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"at": "reader", "err": err, "details": err.Error()})
 		return
 	}
 
 	// Write data to storage
 	if err := s.Writer.Write(ctx, summary); err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"err": err, "details": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"at": "writer", "err": err, "details": err.Error()})
 		return
 	}
 

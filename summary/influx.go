@@ -2,6 +2,7 @@ package summary
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	influxdb2 "github.com/influxdata/influxdb-client-go"
 	"math"
@@ -13,19 +14,19 @@ type Influx struct {
 }
 
 func (i *Influx) Read(ctx context.Context, summary map[string]*Summary) error {
-	today := time.Now().Format("2006-01-02")
-	yesterday := time.Now().Add(time.Hour * -12).Format("2006-01-02")
+	end := time.Now().Add(time.Hour * -12).Format("2006-01-02")
+	start := time.Now().Add(time.Hour * -36).Format("2006-01-02")
 
 	queryString := fmt.Sprintf(`from(bucket: "production/autogen")
   |> range(start: %sT17:00:00Z, stop: %sT16:59:59Z)
   |> filter(fn: (r) => r._measurement == "sensor")
   |> mean()
-  |> duplicate(column: "_stop", as: "_time")`, today, yesterday)
+  |> duplicate(column: "_stop", as: "_time")`, start, end)
 
 	// Query data
 	result, err := i.QueryApi.Query(context.Background(), queryString)
 	if err != nil {
-		return err
+		return errors.New(queryString)
 	}
 
 	for result.Next() {

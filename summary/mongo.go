@@ -12,7 +12,7 @@ type Mongo struct {
 }
 
 func (m *Mongo) WriteMean(ctx context.Context, summary map[string]*Summary) error {
-	today := time.Now().Add(time.Hour * -12).Format("2006-01-02")
+	today := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 
 	// Populate for bulk writing
 	models := make([]mongo.WriteModel, 0)
@@ -21,7 +21,7 @@ func (m *Mongo) WriteMean(ctx context.Context, summary map[string]*Summary) erro
 		m := mongo.NewUpdateOneModel()
 
 		m.SetUpsert(true)
-		m.SetFilter(bson.M{"controller_id": v.ControllerId, "user_id": v.UserId})
+		m.SetFilter(bson.M{"controller_id": v.ControllerId, "user_id": v.UserId, "date": today})
 		m.SetUpdate(bson.M{
 			"$set": bson.M{
 				"date":               today,
@@ -44,7 +44,7 @@ func (m *Mongo) WriteMean(ctx context.Context, summary map[string]*Summary) erro
 }
 
 func (m *Mongo) WriteMedian(ctx context.Context, summary map[string]*Summary) error {
-	today := time.Now().Add(time.Hour * -12).Format("2006-01-02")
+	today := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 
 	// Populate for bulk writing
 	models := make([]mongo.WriteModel, 0)

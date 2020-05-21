@@ -14,8 +14,8 @@ type Influx struct {
 }
 
 func (i *Influx) ReadMean(ctx context.Context, summary map[string]*Summary) error {
-	end := time.Now().Add(time.Hour * -12).Format("2006-01-02")
-	start := time.Now().Add(time.Hour * -36).Format("2006-01-02")
+	start := time.Now().AddDate(0, 0, -2).Format("2006-01-02")
+	end := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 
 	queryString := fmt.Sprintf(`from(bucket: "production/autogen")
   |> range(start: %sT17:00:00Z, stop: %sT16:59:59Z)
@@ -44,8 +44,8 @@ func (i *Influx) ReadMean(ctx context.Context, summary map[string]*Summary) erro
 }
 
 func (i *Influx) ReadMedian(ctx context.Context, summary map[string]*Summary) error {
-	end := time.Now().Add(time.Hour * -12).Format("2006-01-02")
-	start := time.Now().Add(time.Hour * -36).Format("2006-01-02")
+	start := time.Now().AddDate(0, 0, -2).Format("2006-01-02")
+	end := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 
 	queryString := fmt.Sprintf(`from(bucket: "production/autogen")
   |> range(start: %sT17:00:00Z, stop: %sT16:59:59Z)

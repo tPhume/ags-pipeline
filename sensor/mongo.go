@@ -4,6 +4,7 @@ import (
 	"context"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 )
 
 type Mongodb struct {
@@ -31,6 +32,18 @@ func (m *Mongodb) Get(ctx context.Context, token string, meta *Meta) error {
 }
 
 func (m *Mongodb) Write(ctx context.Context, meta *Meta, msg *Message) error {
-	_, _ = m.Col.UpdateOne(ctx, bson.M{"_id": meta.ControllerId, "user_id": meta.UserId}, msg.Data)
+	res, err := m.DataCol.UpdateOne(ctx, bson.M{"_id": meta.ControllerId, "user_id": meta.UserId}, bson.M{
+		"$set": bson.M{
+			"temperature":   msg.Data.Temperature,
+			"humidity":      msg.Data.Humidity,
+			"light":         msg.Data.Light,
+			"soil_moisture": msg.Data.SoilMoisture,
+			"water_level":   msg.Data.WaterLevel,
+		},
+	})
+
+	log.Println(meta)
+	log.Println(res)
+	log.Println(err)
 	return nil
 }

@@ -31,6 +31,6 @@ func (m *Mongodb) Get(ctx context.Context, token string, meta *Meta) error {
 }
 
 func (m *Mongodb) Write(ctx context.Context, meta *Meta, msg *Message) error {
-	_, _ = m.Col.UpdateOne(ctx, bson.M{"_id": meta.ControllerId, "controller_id": meta.ControllerId}, msg.Data)
+	_, _ = m.Col.UpdateOne(ctx, bson.M{"_id": meta.ControllerId, "user_id": meta.UserId}, msg.Data)
 	return nil
 }

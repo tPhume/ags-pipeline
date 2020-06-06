@@ -18,7 +18,7 @@ func main() {
 	var err error
 
 	// Setup configuration
-	viper.SetConfigFile("main_influx.env")
+	viper.SetConfigFile("main_mongo.env")
 
 	err = viper.ReadInConfig()
 	failOnError("could not read env file", err)

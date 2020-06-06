@@ -7,7 +7,8 @@ import (
 )
 
 type Mongodb struct {
-	Col *mongo.Collection
+	Col     *mongo.Collection
+	DataCol *mongo.Collection
 }
 
 func (m *Mongodb) Get(ctx context.Context, token string, meta *Meta) error {
@@ -26,5 +27,10 @@ func (m *Mongodb) Get(ctx context.Context, token string, meta *Meta) error {
 		return err
 	}
 
+	return nil
+}
+
+func (m *Mongodb) Write(ctx context.Context, meta *Meta, msg *Message) error {
+	_, _ = m.Col.UpdateOne(ctx, bson.M{"_id": meta.ControllerId, "controller_id": meta.ControllerId}, msg.Data)
 	return nil
 }
